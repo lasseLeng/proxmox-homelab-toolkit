@@ -1,0 +1,44 @@
+---
+- name: Proxmox base configuration
+  hosts: proxmox_nodes
+  become: true
+
+  tasks:
+    - name: Ensure APT cache is up to date
+      apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: Upgrade packages (dist-upgrade)
+      apt:
+        upgrade: dist
+        autoremove: yes
+
+    - name: Install common packages
+      apt:
+        name: "{{ common_packages }}"
+        state: present
+
+    - name: Set timezone
+      timezone:
+        name: "{{ timezone }}"
+
+    - name: Ensure NTP is installed
+      apt:
+        name: "systemd-timesyncd"
+        state: present
+
+    - name: Configure NTP (timesyncd)
+      copy:
+        dest: /etc/systemd/timesyncd.conf
+        content: |
+          [Time]
+          NTP={{ ntp_server }}
+      notify:
+        - Restart timesyncd
+
+  handlers:
+    - name: Restart timesyncd
+      service:
+        name: systemd-timesyncd
+        state: restarted
