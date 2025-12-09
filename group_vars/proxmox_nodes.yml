@@ -1,0 +1,9 @@
+---
+common_packages:
+  - vim
+  - htop
+  - curl
+  - git
+
+timezone: "Europe/Zurich"
+ntp_server: "pool.ntp.org"
